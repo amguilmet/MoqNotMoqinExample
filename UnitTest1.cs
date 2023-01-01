@@ -92,6 +92,7 @@ namespace MoqVerifyNotWorking
         {
             var mockBus = new Mock<MessageBus>();
             var realBus = new MessageBus();
+            mockBus.Setup(e => e.PublishEvent(It.IsAny<EventToVerify>())).Verifiable();
 
             var repoWithMock = new Repository(mockBus.Object);
             var repoWithReal = new Repository(realBus);
@@ -100,11 +101,10 @@ namespace MoqVerifyNotWorking
             entWithReal.ApplyEvent(new EventToVerify("New Data"));
             repoWithReal.Save(entWithReal);
 
-            mockBus.Setup(e=>e.PublishEvent(It.IsAny<EventToVerify>())).Verifiable();
             Entity entWithMock = new Entity();
             entWithMock.ApplyEvent(new EventToVerify("New Data"));
             repoWithMock.Save(entWithMock);
-            mockBus.Verify(e=>e.PublishEvent(It.IsAny<EventToVerify>()));
+            mockBus.Verify(e=>e.PublishEvent(It.IsAny<EventToVerify>() ), Times.AtLeastOnce);
         }
     }
 }
